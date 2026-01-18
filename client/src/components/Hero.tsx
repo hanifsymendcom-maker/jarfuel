@@ -85,10 +85,11 @@ export default function Hero() {
             <div className="relative w-[400px] h-[500px] animate-float">
               {/* Main Jar Image */}
               <div className="absolute inset-0 rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/50">
-                <img 
-                  src="/images/hero-jar.jpg" 
-                  alt="JarFuel Breakfast Jar" 
+                <img
+                  src="/images/hero-jar.jpg"
+                  alt="JarFuel Breakfast Jar"
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
                 
                 {/* Floating Label Card */}

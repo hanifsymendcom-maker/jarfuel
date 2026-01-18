@@ -34,10 +34,11 @@ export default function Nutrition() {
         </div>
         
         <div className="mt-16 rounded-3xl overflow-hidden shadow-2xl">
-          <img 
-            src="/images/ingredients-flatlay.jpg" 
-            alt="Healthy Ingredients Flatlay" 
+          <img
+            src="/images/ingredients-flatlay.jpg"
+            alt="Healthy Ingredients Flatlay"
             className="w-full h-64 md:h-80 object-cover opacity-90 hover:opacity-100 transition-opacity duration-500"
+            loading="lazy"
           />
         </div>
       </div>
