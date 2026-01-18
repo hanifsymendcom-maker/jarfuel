@@ -30,14 +30,17 @@ interface WaitlistContextType {
 const WaitlistContext = createContext<WaitlistContextType | null>(null);
 
 export function WaitlistProvider({ children }: { children: ReactNode }) {
-  // Minimum display count for social proof (never show less than this)
-  const MIN_DISPLAY_COUNT = 147;
+  // Base display count for social proof (added to actual signups)
+  const BASE_COUNT = 147;
 
-  const [count, setCount] = useState(MIN_DISPLAY_COUNT);
+  const [count, setCount] = useState(BASE_COUNT);
   const [currentUser, setCurrentUser] = useState<WaitlistEntry | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [referralFromUrl, setReferralFromUrl] = useState<string | null>(null);
+
+  // Helper to calculate display count (base + actual signups)
+  const calculateDisplayCount = (actualCount: number) => BASE_COUNT + actualCount;
 
   // Initialize
   useEffect(() => {
@@ -55,9 +58,9 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
           setCurrentUser(user);
         }
 
-        // Get initial count (always show at least MIN_DISPLAY_COUNT)
-        const initialCount = await getWaitlistCount();
-        setCount(Math.max(initialCount, MIN_DISPLAY_COUNT));
+        // Get initial count (base + actual signups)
+        const actualCount = await getWaitlistCount();
+        setCount(calculateDisplayCount(actualCount));
       } catch (err) {
         console.error("Error initializing waitlist:", err);
       } finally {
@@ -70,16 +73,16 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
 
   // Subscribe to real-time updates
   useEffect(() => {
-    const unsubscribe = subscribeToWaitlist((newCount) => {
-      setCount(Math.max(newCount, MIN_DISPLAY_COUNT));
+    const unsubscribe = subscribeToWaitlist((actualCount) => {
+      setCount(calculateDisplayCount(actualCount));
     });
 
     return unsubscribe;
   }, []);
 
   const refreshCount = useCallback(async () => {
-    const newCount = await getWaitlistCount();
-    setCount(Math.max(newCount, MIN_DISPLAY_COUNT));
+    const actualCount = await getWaitlistCount();
+    setCount(calculateDisplayCount(actualCount));
   }, []);
 
   const join = useCallback(
