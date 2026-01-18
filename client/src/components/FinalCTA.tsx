@@ -2,10 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { ShieldCheck, Zap } from "lucide-react";
+import ReferralModal from "./ReferralModal";
 
 export default function FinalCTA() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+  const [memberNumber, setMemberNumber] = useState(0);
   const [timeLeft, setTimeLeft] = useState({
     days: 14,
     hours: 8,
@@ -27,64 +31,96 @@ export default function FinalCTA() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
+
+    const newMemberNumber = 148 + Math.floor(Math.random() * 10);
+    setMemberNumber(newMemberNumber);
     setSubmitted(true);
     toast.success("Spot reserved! Welcome aboard.");
-    setEmail("");
+
+    // Show referral modal after a short delay
+    setTimeout(() => {
+      setShowReferralModal(true);
+    }, 1000);
   };
 
   return (
-    <section className="py-24 bg-foreground text-background text-center relative overflow-hidden">
-      {/* Abstract background shapes */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-10">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary blur-[100px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent blur-[100px]" />
-      </div>
+    <>
+      <section className="py-24 bg-foreground text-background text-center relative overflow-hidden">
+        {/* Abstract background shapes */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-10">
+          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary blur-[100px]" />
+          <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent blur-[100px]" />
+        </div>
 
-      <div className="container mx-auto relative z-10">
-        <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ready to Fix Your Mornings?</h2>
-        <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-          Join the waitlist now. First 250 subscribers get founding member pricing locked in forever.
-        </p>
-        
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-16">
-          <Input 
-            type="email" 
-            placeholder="Enter your email" 
-            className="rounded-full px-6 py-6 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:ring-accent focus-visible:border-accent"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={submitted}
-          />
-          <Button 
-            type="submit" 
-            size="lg" 
-            className="rounded-full px-8 py-6 text-lg font-bold bg-accent hover:bg-accent/90 text-white border-none shadow-lg shadow-accent/20"
-            disabled={submitted}
-          >
-            {submitted ? "Reserved!" : "Reserve My Spot"}
-          </Button>
-        </form>
-        
-        <div className="inline-block bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/10">
-          <div className="text-sm font-medium text-white/70 mb-4 uppercase tracking-widest">Founding member pricing ends in</div>
-          <div className="flex gap-8 justify-center">
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-extrabold text-white mb-1">{timeLeft.days.toString().padStart(2, '0')}</div>
-              <div className="text-xs text-white/60 uppercase">Days</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-extrabold text-white mb-1">{timeLeft.hours.toString().padStart(2, '0')}</div>
-              <div className="text-xs text-white/60 uppercase">Hours</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-extrabold text-white mb-1">{timeLeft.minutes.toString().padStart(2, '0')}</div>
-              <div className="text-xs text-white/60 uppercase">Minutes</div>
+        <div className="container mx-auto relative z-10">
+          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-2 rounded-full text-sm font-bold mb-6">
+            <Zap className="w-4 h-4" />
+            Limited Time Offer
+          </div>
+
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ready to Fix Your Mornings?</h2>
+          <p className="text-xl text-white/80 mb-4 max-w-2xl mx-auto">
+            Join the waitlist now. First 250 subscribers get founding member pricing locked in forever.
+          </p>
+
+          {/* Risk Reversal */}
+          <div className="inline-flex items-center gap-2 text-green-400 mb-10">
+            <ShieldCheck className="w-5 h-5" />
+            <span className="font-medium">100% Happiness Guarantee • Try Risk-Free</span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-8">
+            <Input
+              type="email"
+              placeholder="Enter your email"
+              className="rounded-full px-6 py-6 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:ring-accent focus-visible:border-accent"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={submitted}
+            />
+            <Button
+              type="submit"
+              size="lg"
+              className="rounded-full px-8 py-6 text-lg font-bold bg-accent hover:bg-accent/90 text-white border-none shadow-lg shadow-accent/20"
+              disabled={submitted}
+            >
+              {submitted ? "Reserved!" : "Reserve My Spot"}
+            </Button>
+          </form>
+
+          {/* Social proof */}
+          <p className="text-white/60 text-sm mb-16">
+            Join 147+ busy professionals who've already signed up
+          </p>
+
+          <div className="inline-block bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/10">
+            <div className="text-sm font-medium text-white/70 mb-4 uppercase tracking-widest">Founding member pricing ends in</div>
+            <div className="flex gap-8 justify-center">
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-extrabold text-white mb-1">{timeLeft.days.toString().padStart(2, '0')}</div>
+                <div className="text-xs text-white/60 uppercase">Days</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-extrabold text-white mb-1">{timeLeft.hours.toString().padStart(2, '0')}</div>
+                <div className="text-xs text-white/60 uppercase">Hours</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-extrabold text-white mb-1">{timeLeft.minutes.toString().padStart(2, '0')}</div>
+                <div className="text-xs text-white/60 uppercase">Minutes</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Referral Modal */}
+      <ReferralModal
+        isOpen={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+        memberNumber={memberNumber}
+        email={email || "member@example.com"}
+      />
+    </>
   );
 }
