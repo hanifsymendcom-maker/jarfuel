@@ -26,6 +26,16 @@ async function startServer() {
   // Parse JSON bodies
   app.use(express.json());
 
+  // Enable CORS for development (Vite dev server runs on different port)
+  if (process.env.NODE_ENV !== "production") {
+    app.use((_req, res, next) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-Type");
+      next();
+    });
+  }
+
   // Serve static files from dist/public in production
   const staticPath =
     process.env.NODE_ENV === "production"
@@ -96,7 +106,8 @@ async function startServer() {
     res.sendFile(path.join(staticPath, "index.html"));
   });
 
-  const port = process.env.PORT || 3000;
+  // In dev mode (when Vite proxy is used), run on 3001. In production, use PORT or 3000.
+  const port = process.env.PORT || (process.env.NODE_ENV === "production" ? 3000 : 3001);
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
