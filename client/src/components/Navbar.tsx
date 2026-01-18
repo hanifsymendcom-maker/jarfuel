@@ -31,10 +31,8 @@ export default function Navbar() {
       )}
     >
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/">
-          <a className="text-2xl font-extrabold text-primary tracking-tight">
-            Jar<span className="text-accent">Fuel</span>
-          </a>
+        <Link href="/" className="text-2xl font-extrabold text-primary tracking-tight">
+          Jar<span className="text-accent">Fuel</span>
         </Link>
 
         <Button 
