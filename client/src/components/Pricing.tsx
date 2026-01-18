@@ -3,19 +3,28 @@ import { Input } from "@/components/ui/input";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useWaitlist } from "@/contexts/WaitlistContext";
 
 export default function Pricing() {
   const [email, setEmail] = useState("");
+  const { currentUser, join, isLoading } = useWaitlist();
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
-    setSubmitted(true);
-    toast.success("Added to the waitlist! We'll be in touch.");
-    setEmail("");
+
+    const success = await join(email, "pricing");
+    if (success) {
+      setSubmitted(true);
+      toast.success("Added to the waitlist! We'll be in touch.");
+      setEmail("");
+    } else {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
+
+  const isSubmitted = submitted || !!currentUser;
 
   return (
     <section className="py-24 bg-secondary/30">
@@ -63,22 +72,22 @@ export default function Pricing() {
           </div>
           
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <Input 
-              type="email" 
-              placeholder="Your email" 
+            <Input
+              type="email"
+              placeholder="Your email"
               className="rounded-full px-6 py-6 text-center border-2"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={submitted}
+              disabled={isSubmitted || isLoading}
             />
-            <Button 
-              type="submit" 
-              size="lg" 
+            <Button
+              type="submit"
+              size="lg"
               className="w-full rounded-full py-6 text-lg font-bold bg-accent hover:bg-accent/90 text-white shadow-lg shadow-accent/20"
-              disabled={submitted}
+              disabled={isSubmitted || isLoading}
             >
-              {submitted ? "You're on the list!" : "Join Waitlist"}
+              {isLoading ? "Joining..." : isSubmitted ? "You're on the list!" : "Join Waitlist"}
             </Button>
           </form>
         </div>

@@ -45,10 +45,11 @@ export default function HowItWorks() {
         </div>
         
         <div className="mt-20 rounded-[3rem] overflow-hidden shadow-2xl max-w-5xl mx-auto">
-          <img 
-            src="/images/lifestyle-grab.jpg" 
-            alt="Grab and Go Lifestyle" 
+          <img
+            src="/images/lifestyle-grab.jpg"
+            alt="Grab and Go Lifestyle"
             className="w-full h-[400px] object-cover hover:scale-105 transition-transform duration-700"
+            loading="lazy"
           />
         </div>
       </div>

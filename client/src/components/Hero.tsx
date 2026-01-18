@@ -2,21 +2,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useWaitlist } from "@/contexts/WaitlistContext";
 
 export default function Hero() {
   const [email, setEmail] = useState("");
-  const [count, setCount] = useState(147);
+  const { count, currentUser, join, isLoading } = useWaitlist();
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
-    setCount(prev => prev + 1);
-    setSubmitted(true);
-    toast.success("You're on the list! Welcome to the JarFuel family.");
-    setEmail("");
+
+    const success = await join(email, "hero");
+    if (success) {
+      setSubmitted(true);
+      toast.success("You're on the list! Welcome to the JarFuel family.");
+      setEmail("");
+    } else {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
+
+  const isSubmitted = submitted || !!currentUser;
 
   return (
     <section id="waitlist" className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden bg-gradient-to-br from-background to-green-50">
@@ -56,27 +63,27 @@ export default function Hero() {
           </div>
           
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 mb-6 max-w-md">
-            <Input 
-              type="email" 
-              placeholder="Enter your email" 
+            <Input
+              type="email"
+              placeholder="Enter your email"
               className="rounded-full px-6 py-6 text-lg border-2 focus-visible:ring-primary"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={submitted}
+              disabled={isSubmitted || isLoading}
             />
-            <Button 
-              type="submit" 
-              size="lg" 
+            <Button
+              type="submit"
+              size="lg"
               className="rounded-full px-8 py-6 text-lg font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all hover:-translate-y-1 bg-accent hover:bg-accent/90 text-white border-none"
-              disabled={submitted}
+              disabled={isSubmitted || isLoading}
             >
-              {submitted ? "You're In!" : "Get Early Access"}
+              {isLoading ? "Joining..." : isSubmitted ? "You're In!" : "Get Early Access"}
             </Button>
           </form>
-          
+
           <p className="text-sm text-muted-foreground">
-            🔥 <strong className="text-primary">{count}</strong> people already signed up. <strong>{250 - count} spots</strong> left for launch pricing!
+            🔥 <strong className="text-primary">{count}</strong> people already signed up. <strong>{Math.max(250 - count, 0)} spots</strong> left for launch pricing!
           </p>
         </div>
         
@@ -85,10 +92,11 @@ export default function Hero() {
             <div className="relative w-[400px] h-[500px] animate-float">
               {/* Main Jar Image */}
               <div className="absolute inset-0 rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/50">
-                <img 
-                  src="/images/hero-jar.jpg" 
-                  alt="JarFuel Breakfast Jar" 
+                <img
+                  src="/images/hero-jar.jpg"
+                  alt="JarFuel Breakfast Jar"
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
                 
                 {/* Floating Label Card */}

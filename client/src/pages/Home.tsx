@@ -1,13 +1,20 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Progress from "@/components/Progress";
+import SocialProof from "@/components/SocialProof";
+import WhoItsFor from "@/components/WhoItsFor";
 import Benefits from "@/components/Benefits";
+import ThoughtLeadership from "@/components/ThoughtLeadership";
 import Nutrition from "@/components/Nutrition";
 import Comparison from "@/components/Comparison";
 import HowItWorks from "@/components/HowItWorks";
 import Pricing from "@/components/Pricing";
+import ReferralProgram from "@/components/ReferralProgram";
+import FAQ from "@/components/FAQ";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
+import StickyMobileCTA from "@/components/StickyMobileCTA";
+import LeadMagnet from "@/components/LeadMagnet";
 
 export default function Home() {
   return (
@@ -15,15 +22,24 @@ export default function Home() {
       <Navbar />
       <main className="flex-grow">
         <Hero />
-        <Progress />
+        <SocialProof />
+        <WhoItsFor />
         <Benefits />
+        <ThoughtLeadership />
         <Nutrition />
         <Comparison />
         <HowItWorks />
         <Pricing />
+        <ReferralProgram />
+        <FAQ />
         <FinalCTA />
       </main>
       <Footer />
+
+      {/* Conversion optimization overlays */}
+      <ExitIntentPopup />
+      <StickyMobileCTA />
+      <LeadMagnet />
     </div>
   );
 }

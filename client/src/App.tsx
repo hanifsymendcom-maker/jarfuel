@@ -4,13 +4,20 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { WaitlistProvider } from "./contexts/WaitlistContext";
 import Home from "./pages/Home";
+import Admin from "./pages/Admin";
+import Science from "./pages/Science";
+import IngredientDetail from "./pages/IngredientDetail";
 
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/admin"} component={Admin} />
+      <Route path={"/science"} component={Science} />
+      <Route path={"/science/:id"} component={IngredientDetail} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -30,10 +37,12 @@ function App() {
         defaultTheme="light"
         // switchable
       >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <WaitlistProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </WaitlistProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

@@ -22,7 +22,8 @@ export function ThemeProvider({
   switchable = false,
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (switchable) {
+    // Check for browser environment before accessing localStorage
+    if (switchable && typeof window !== "undefined") {
       const stored = localStorage.getItem("theme");
       return (stored as Theme) || defaultTheme;
     }
@@ -30,6 +31,9 @@ export function ThemeProvider({
   });
 
   useEffect(() => {
+    // Only run in browser environment
+    if (typeof window === "undefined") return;
+
     const root = document.documentElement;
     if (theme === "dark") {
       root.classList.add("dark");
