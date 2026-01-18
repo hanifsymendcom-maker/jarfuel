@@ -83,7 +83,7 @@ export default function Hero() {
           </form>
 
           <p className="text-sm text-muted-foreground">
-            🔥 <strong className="text-primary">{count || 147}</strong> people already signed up. <strong>{Math.max(250 - (count || 147), 0)} spots</strong> left for launch pricing!
+            🔥 <strong className="text-primary">{count}</strong> people already signed up. <strong>{Math.max(250 - count, 0)} spots</strong> left for launch pricing!
           </p>
         </div>
         

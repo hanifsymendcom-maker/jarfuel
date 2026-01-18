@@ -7,6 +7,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { WaitlistProvider } from "./contexts/WaitlistContext";
 import Home from "./pages/Home";
 import Admin from "./pages/Admin";
+import Science from "./pages/Science";
+import IngredientDetail from "./pages/IngredientDetail";
 
 
 function Router() {
@@ -14,6 +16,8 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/admin"} component={Admin} />
+      <Route path={"/science"} component={Science} />
+      <Route path={"/science/:id"} component={IngredientDetail} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

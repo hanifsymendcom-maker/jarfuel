@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import SocialProof from "@/components/SocialProof";
 import WhoItsFor from "@/components/WhoItsFor";
 import Benefits from "@/components/Benefits";
+import ThoughtLeadership from "@/components/ThoughtLeadership";
 import Nutrition from "@/components/Nutrition";
 import Comparison from "@/components/Comparison";
 import HowItWorks from "@/components/HowItWorks";
@@ -24,6 +25,7 @@ export default function Home() {
         <SocialProof />
         <WhoItsFor />
         <Benefits />
+        <ThoughtLeadership />
         <Nutrition />
         <Comparison />
         <HowItWorks />

@@ -11,8 +11,8 @@ export default function SocialProof({ targetCount = 250 }: SocialProofProps) {
   const [animatedCount, setAnimatedCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Use real count or fallback to a minimum display value
-  const currentCount = Math.max(count, 147);
+  // count already has minimum enforced by WaitlistContext
+  const currentCount = count;
 
   useEffect(() => {
     setIsVisible(true);

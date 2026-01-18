@@ -12,7 +12,8 @@ export default function LeadMagnet() {
   const { count, currentUser, join, isLoading } = useWaitlist();
 
   const isSubmitted = submitted || !!currentUser;
-  const displayCount = count || 147;
+  // count already has minimum enforced by WaitlistContext
+  const displayCount = count;
 
   useEffect(() => {
     // Don't show if already on waitlist

@@ -46,7 +46,8 @@ export default function StickyMobileCTA() {
   };
 
   const isSubmitted = submitted || !!currentUser;
-  const displayCount = count || 147;
+  // count already has minimum enforced by WaitlistContext
+  const displayCount = count;
 
   const scrollToTop = () => {
     const heroSection = document.getElementById("waitlist");

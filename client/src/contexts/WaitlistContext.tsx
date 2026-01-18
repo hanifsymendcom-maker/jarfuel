@@ -30,7 +30,10 @@ interface WaitlistContextType {
 const WaitlistContext = createContext<WaitlistContextType | null>(null);
 
 export function WaitlistProvider({ children }: { children: ReactNode }) {
-  const [count, setCount] = useState(0);
+  // Minimum display count for social proof (never show less than this)
+  const MIN_DISPLAY_COUNT = 147;
+
+  const [count, setCount] = useState(MIN_DISPLAY_COUNT);
   const [currentUser, setCurrentUser] = useState<WaitlistEntry | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,9 +55,9 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
           setCurrentUser(user);
         }
 
-        // Get initial count
+        // Get initial count (always show at least MIN_DISPLAY_COUNT)
         const initialCount = await getWaitlistCount();
-        setCount(initialCount);
+        setCount(Math.max(initialCount, MIN_DISPLAY_COUNT));
       } catch (err) {
         console.error("Error initializing waitlist:", err);
       } finally {
@@ -68,7 +71,7 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
   // Subscribe to real-time updates
   useEffect(() => {
     const unsubscribe = subscribeToWaitlist((newCount) => {
-      setCount(newCount);
+      setCount(Math.max(newCount, MIN_DISPLAY_COUNT));
     });
 
     return unsubscribe;
@@ -76,7 +79,7 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
 
   const refreshCount = useCallback(async () => {
     const newCount = await getWaitlistCount();
-    setCount(newCount);
+    setCount(Math.max(newCount, MIN_DISPLAY_COUNT));
   }, []);
 
   const join = useCallback(
