@@ -321,7 +321,7 @@ export const ingredients: Ingredient[] = [
           "Cold brew is 67% less acidic than hot coffee, making it gentler on the stomach and teeth while preserving beneficial antioxidants.",
       },
     ],
-    nutritionPer100ml: {
+    nutritionPer100g: {
       Calories: "2 kcal",
       Caffeine: "150-200mg",
       "Chlorogenic Acid": "70-100mg",
