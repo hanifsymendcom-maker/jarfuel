@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ChevronUp, X } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/useMobile";
+import { useWaitlist } from "@/contexts/WaitlistContext";
 
 export default function StickyMobileCTA() {
   const [isVisible, setIsVisible] = useState(false);
@@ -12,8 +13,11 @@ export default function StickyMobileCTA() {
   const [submitted, setSubmitted] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const isMobile = useIsMobile();
+  const { count, currentUser, join, isLoading } = useWaitlist();
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const handleScroll = () => {
       // Show after scrolling past hero section (roughly 500px)
       const shouldShow = window.scrollY > 500;
@@ -24,17 +28,25 @@ export default function StickyMobileCTA() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isDismissed]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
-    setSubmitted(true);
-    toast.success("You're on the list!");
-    setEmail("");
-    setTimeout(() => {
-      setIsExpanded(false);
-    }, 2000);
+    const success = await join(email, "sticky_mobile");
+    if (success) {
+      setSubmitted(true);
+      toast.success("You're on the list!");
+      setEmail("");
+      setTimeout(() => {
+        setIsExpanded(false);
+      }, 2000);
+    } else {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
+
+  const isSubmitted = submitted || !!currentUser;
+  const displayCount = count || 147;
 
   const scrollToTop = () => {
     const heroSection = document.getElementById("waitlist");
@@ -57,14 +69,14 @@ export default function StickyMobileCTA() {
         <div className="bg-foreground text-background p-4 shadow-2xl border-t border-white/10">
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1">
-              <div className="text-sm font-bold">Join 147+ on the waitlist</div>
+              <div className="text-sm font-bold">Join {displayCount}+ on the waitlist</div>
               <div className="text-xs text-white/70">Lock in founding member pricing</div>
             </div>
             <Button
               onClick={() => setIsExpanded(true)}
               className="rounded-full px-6 bg-accent hover:bg-accent/90 text-white font-bold shadow-lg"
             >
-              Join Now
+              {isSubmitted ? "You're In!" : "Join Now"}
             </Button>
             <button
               onClick={() => setIsDismissed(true)}
@@ -82,7 +94,7 @@ export default function StickyMobileCTA() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <h3 className="font-bold text-foreground">Get Early Access</h3>
-              <p className="text-sm text-muted-foreground">Only 103 founding spots left</p>
+              <p className="text-sm text-muted-foreground">Only {Math.max(250 - displayCount, 0)} founding spots left</p>
             </div>
             <button
               onClick={() => setIsExpanded(false)}
@@ -92,7 +104,7 @@ export default function StickyMobileCTA() {
             </button>
           </div>
 
-          {submitted ? (
+          {isSubmitted ? (
             <div className="text-center py-2">
               <p className="text-primary font-semibold">Welcome to JarFuel!</p>
             </div>
@@ -105,12 +117,14 @@ export default function StickyMobileCTA() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="rounded-full flex-1"
                 required
+                disabled={isLoading}
               />
               <Button
                 type="submit"
                 className="rounded-full px-6 bg-accent hover:bg-accent/90 text-white font-bold"
+                disabled={isLoading}
               >
-                Join
+                {isLoading ? "..." : "Join"}
               </Button>
             </form>
           )}

@@ -3,16 +3,20 @@ import { X, Gift, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useWaitlist } from "@/contexts/WaitlistContext";
 
 export default function ExitIntentPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [hasTriggered, setHasTriggered] = useState(false);
+  const { currentUser, join, isLoading } = useWaitlist();
+
+  const isSubmitted = submitted || !!currentUser;
 
   const handleMouseLeave = useCallback(
     (e: MouseEvent) => {
-      if (e.clientY <= 0 && !hasTriggered && !submitted) {
+      if (e.clientY <= 0 && !hasTriggered && !isSubmitted) {
         const dismissed = sessionStorage.getItem("exitPopupDismissed");
         if (!dismissed) {
           setIsOpen(true);
@@ -20,7 +24,7 @@ export default function ExitIntentPopup() {
         }
       }
     },
-    [hasTriggered, submitted]
+    [hasTriggered, isSubmitted]
   );
 
   useEffect(() => {
@@ -33,15 +37,20 @@ export default function ExitIntentPopup() {
     sessionStorage.setItem("exitPopupDismissed", "true");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
-    setSubmitted(true);
-    toast.success("You're in! Check your email for your free guide.");
-    setTimeout(() => {
-      setIsOpen(false);
-    }, 2000);
+    const success = await join(email, "exit_intent");
+    if (success) {
+      setSubmitted(true);
+      toast.success("You're in! Check your email for your free guide.");
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 2000);
+    } else {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   if (!isOpen) return null;
@@ -109,7 +118,7 @@ export default function ExitIntentPopup() {
             </ul>
           </div>
 
-          {submitted ? (
+          {isSubmitted ? (
             <div className="text-center py-4">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Gift className="w-8 h-8 text-primary" />
@@ -125,13 +134,15 @@ export default function ExitIntentPopup() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="rounded-full px-6 py-6 text-center border-2"
                 required
+                disabled={isLoading}
               />
               <Button
                 type="submit"
                 size="lg"
                 className="w-full rounded-full py-6 text-lg font-bold bg-accent hover:bg-accent/90 text-white"
+                disabled={isLoading}
               >
-                Send Me The Free Guide
+                {isLoading ? "Sending..." : "Send Me The Free Guide"}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </form>

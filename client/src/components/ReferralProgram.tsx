@@ -3,14 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Gift, Users, Trophy, Zap, Copy, Check, Twitter, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useWaitlist } from "@/contexts/WaitlistContext";
 
 export default function ReferralProgram() {
   const [email, setEmail] = useState("");
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [referralCode, setReferralCode] = useState("");
   const [copied, setCopied] = useState(false);
-  const [position, setPosition] = useState(148);
-  const [referrals, setReferrals] = useState(0);
+  const { currentUser, join, getReferralLink, isLoading } = useWaitlist();
+
+  const isRegistered = !!currentUser;
+  const referralCode = currentUser?.referral_code || "";
+  const position = currentUser?.position || 0;
+  const referrals = currentUser?.referral_count || 0;
 
   const rewards = [
     {
@@ -33,19 +36,20 @@ export default function ReferralProgram() {
     },
   ];
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
-    // Generate a fake referral code
-    const code = `JF${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    setReferralCode(code);
-    setIsRegistered(true);
-    setPosition(Math.floor(Math.random() * 50) + 100);
-    toast.success("You're in! Share your link to move up the list.");
+    const success = await join(email, "referral");
+    if (success) {
+      toast.success("You're in! Share your link to move up the list.");
+      setEmail("");
+    } else {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
-  const referralLink = `https://jarfuel.com/join?ref=${referralCode}`;
+  const referralLink = getReferralLink() || `${window.location.origin}?ref=${referralCode}`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
@@ -128,13 +132,15 @@ export default function ReferralProgram() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="rounded-full px-6 py-6 text-center border-2"
                   required
+                  disabled={isLoading}
                 />
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full rounded-full py-6 text-lg font-bold bg-primary hover:bg-primary/90"
+                  disabled={isLoading}
                 >
-                  Get My Referral Link
+                  {isLoading ? "Getting Link..." : "Get My Referral Link"}
                 </Button>
               </form>
             </>

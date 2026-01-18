@@ -2,36 +2,47 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useWaitlist } from "@/contexts/WaitlistContext";
 
 export default function FinalCTA() {
   const [email, setEmail] = useState("");
+  const { currentUser, join, isLoading } = useWaitlist();
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     days: 14,
     hours: 8,
-    minutes: 42
+    minutes: 42,
   });
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59 };
-        if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, minutes: 59 };
+        if (prev.hours > 0)
+          return { ...prev, hours: prev.hours - 1, minutes: 59 };
+        if (prev.days > 0)
+          return { ...prev, days: prev.days - 1, hours: 23, minutes: 59 };
         return prev;
       });
     }, 60000);
     return () => clearInterval(timer);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
-    setSubmitted(true);
-    toast.success("Spot reserved! Welcome aboard.");
-    setEmail("");
+
+    const success = await join(email, "final_cta");
+    if (success) {
+      setSubmitted(true);
+      toast.success("Spot reserved! Welcome aboard.");
+      setEmail("");
+    } else {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
+
+  const isSubmitted = submitted || !!currentUser;
 
   return (
     <section className="py-24 bg-foreground text-background text-center relative overflow-hidden">
@@ -48,22 +59,22 @@ export default function FinalCTA() {
         </p>
         
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-16">
-          <Input 
-            type="email" 
-            placeholder="Enter your email" 
+          <Input
+            type="email"
+            placeholder="Enter your email"
             className="rounded-full px-6 py-6 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:ring-accent focus-visible:border-accent"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            disabled={submitted}
+            disabled={isSubmitted || isLoading}
           />
-          <Button 
-            type="submit" 
-            size="lg" 
+          <Button
+            type="submit"
+            size="lg"
             className="rounded-full px-8 py-6 text-lg font-bold bg-accent hover:bg-accent/90 text-white border-none shadow-lg shadow-accent/20"
-            disabled={submitted}
+            disabled={isSubmitted || isLoading}
           >
-            {submitted ? "Reserved!" : "Reserve My Spot"}
+            {isLoading ? "Reserving..." : isSubmitted ? "Reserved!" : "Reserve My Spot"}
           </Button>
         </form>
         

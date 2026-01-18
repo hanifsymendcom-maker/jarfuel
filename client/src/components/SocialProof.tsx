@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import { Star, Shield, Truck, Leaf } from "lucide-react";
+import { useWaitlist } from "@/contexts/WaitlistContext";
 
 interface SocialProofProps {
-  currentCount?: number;
   targetCount?: number;
 }
 
-export default function SocialProof({ currentCount = 147, targetCount = 250 }: SocialProofProps) {
+export default function SocialProof({ targetCount = 250 }: SocialProofProps) {
+  const { count } = useWaitlist();
   const [animatedCount, setAnimatedCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+
+  // Use real count or fallback to a minimum display value
+  const currentCount = Math.max(count, 147);
 
   useEffect(() => {
     setIsVisible(true);
@@ -30,7 +34,7 @@ export default function SocialProof({ currentCount = 147, targetCount = 250 }: S
     return () => clearInterval(timer);
   }, [currentCount]);
 
-  const percentFilled = (currentCount / targetCount) * 100;
+  const percentFilled = Math.min((currentCount / targetCount) * 100, 100);
 
   const trustBadges = [
     { icon: <Shield className="w-5 h-5" />, label: "100% Money Back" },

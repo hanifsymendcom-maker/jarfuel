@@ -3,13 +3,21 @@ import { X, BookOpen, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useWaitlist } from "@/contexts/WaitlistContext";
 
 export default function LeadMagnet() {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const { count, currentUser, join, isLoading } = useWaitlist();
+
+  const isSubmitted = submitted || !!currentUser;
+  const displayCount = count || 147;
 
   useEffect(() => {
+    // Don't show if already on waitlist
+    if (currentUser) return;
+
     // Show popup after 15 seconds if not dismissed
     const dismissed = sessionStorage.getItem("leadMagnetDismissed");
     const alreadySubmitted = sessionStorage.getItem("leadMagnetSubmitted");
@@ -20,23 +28,28 @@ export default function LeadMagnet() {
       }, 15000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [currentUser]);
 
   const handleClose = () => {
     setIsOpen(false);
     sessionStorage.setItem("leadMagnetDismissed", "true");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
-    setSubmitted(true);
-    sessionStorage.setItem("leadMagnetSubmitted", "true");
-    toast.success("Guide sent! Check your inbox.");
-    setTimeout(() => {
-      setIsOpen(false);
-    }, 3000);
+    const success = await join(email, "lead_magnet");
+    if (success) {
+      setSubmitted(true);
+      sessionStorage.setItem("leadMagnetSubmitted", "true");
+      toast.success("Guide sent! Check your inbox.");
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 3000);
+    } else {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   if (!isOpen) return null;
@@ -84,7 +97,7 @@ export default function LeadMagnet() {
 
         {/* Content */}
         <div className="p-6">
-          {submitted ? (
+          {isSubmitted ? (
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-8 h-8 text-primary" />
@@ -117,19 +130,21 @@ export default function LeadMagnet() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="rounded-full px-5 py-6 border-2"
                   required
+                  disabled={isLoading}
                 />
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full rounded-full py-6 font-bold bg-accent hover:bg-accent/90 text-white"
+                  disabled={isLoading}
                 >
-                  Get Free Guide
+                  {isLoading ? "Sending..." : "Get Free Guide"}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </form>
 
               <p className="text-center text-xs text-muted-foreground mt-4">
-                Join 147+ others. No spam, unsubscribe anytime.
+                Join {displayCount}+ others. No spam, unsubscribe anytime.
               </p>
             </>
           )}
