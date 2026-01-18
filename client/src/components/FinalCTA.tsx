@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { useWaitlist } from "@/contexts/WaitlistContext";
 import ProductVariantSelector from "./ProductVariantSelector";
 
-// Target date: End of February 2026
-const TARGET_DATE = new Date('2026-02-28T23:59:59');
+// Target date: Set to past date to show countdown as zero/expired
+const TARGET_DATE = new Date('2025-01-01T00:00:00');
 
 function calculateTimeLeft() {
   const now = new Date();
