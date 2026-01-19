@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check } from "lucide-react";
+import { Check, Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
 
 export default function Pricing() {
   const [email, setEmail] = useState("");
@@ -11,10 +12,36 @@ export default function Pricing() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
+
     setSubmitted(true);
     toast.success("Added to the waitlist! We'll be in touch.");
+    trackEvent("signup", { location: "pricing" });
+
+    // Dispatch event for signup count sync
+    window.dispatchEvent(new CustomEvent("jarfuel:signup"));
     setEmail("");
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: "JarFuel - $5 Protein Breakfast",
+      text: "Just signed up for $5/day protein breakfast jars! 21g protein, zero prep.",
+      url: window.location.origin + "?ref=share",
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        trackEvent("share", { method: "native", location: "pricing" });
+        toast.success("Thanks for sharing!");
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        trackEvent("share", { method: "clipboard", location: "pricing" });
+        toast.success("Link copied! Share it with friends.");
+      }
+    } catch {
+      // User cancelled or error
+    }
   };
 
   return (
@@ -31,12 +58,12 @@ export default function Pricing() {
           <div className="absolute top-8 -right-12 bg-accent text-white py-2 px-12 rotate-45 font-bold text-sm shadow-md">
             LAUNCH SPECIAL
           </div>
-          
+
           <div className="text-center mb-8">
             <h3 className="text-2xl font-bold text-foreground mb-2">Weekday Warrior Plan</h3>
             <p className="text-muted-foreground">5 jars delivered weekly</p>
           </div>
-          
+
           <div className="text-center mb-4">
             <div className="flex items-baseline justify-center gap-1">
               <span className="text-6xl font-extrabold text-primary">$25</span>
@@ -44,14 +71,14 @@ export default function Pricing() {
             </div>
             <p className="text-muted-foreground mt-2 font-medium">That's just $5 per breakfast!</p>
           </div>
-          
+
           <div className="space-y-4 mb-10">
             {[
               "5 fresh protein jars (M-F)",
               "Free Sunday delivery",
               "Returnable glass jars (eco-friendly)",
               "Skip weeks anytime",
-              "Cancel anytime, no fees"
+              "Cancel anytime, no fees",
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -61,26 +88,43 @@ export default function Pricing() {
               </div>
             ))}
           </div>
-          
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <Input 
-              type="email" 
-              placeholder="Your email" 
-              className="rounded-full px-6 py-6 text-center border-2"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={submitted}
-            />
-            <Button 
-              type="submit" 
-              size="lg" 
-              className="w-full rounded-full py-6 text-lg font-bold bg-accent hover:bg-accent/90 text-white shadow-lg shadow-accent/20"
-              disabled={submitted}
-            >
-              {submitted ? "You're on the list!" : "Join Waitlist"}
-            </Button>
-          </form>
+
+          {!submitted ? (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <Input
+                type="email"
+                placeholder="Your email"
+                className="rounded-full px-6 py-6 text-center border-2"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full rounded-full py-6 text-lg font-bold bg-accent hover:bg-accent/90 text-white shadow-lg shadow-accent/20"
+              >
+                Join Waitlist
+              </Button>
+            </form>
+          ) : (
+            <div className="text-center space-y-4">
+              <div className="bg-green-100 border-2 border-green-300 rounded-2xl p-4">
+                <div className="flex items-center justify-center gap-2 text-green-700 font-bold">
+                  <Check className="w-5 h-5" />
+                  You're on the list!
+                </div>
+              </div>
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                className="w-full rounded-full py-5 font-semibold"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share with friends
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </section>
