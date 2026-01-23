@@ -1,20 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useReferral } from "@/contexts/ReferralContext";
+import ReferralSuccessModal from "@/components/ReferralSuccessModal";
+import { Zap } from "lucide-react";
 
 export default function Hero() {
   const [email, setEmail] = useState("");
   const [count, setCount] = useState(147);
   const [submitted, setSubmitted] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+
+  const { generateReferralCode, isSignedUp, checkReferralCode } = useReferral();
+
+  // Check if user came from a referral link
+  const referredBy = checkReferralCode();
+
+  // Sync submitted state with isSignedUp from context
+  useEffect(() => {
+    if (isSignedUp) {
+      setSubmitted(true);
+    }
+  }, [isSignedUp]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
+
+    // Generate referral code for this user
+    generateReferralCode(email);
+
     setCount(prev => prev + 1);
     setSubmitted(true);
     toast.success("You're on the list! Welcome to the JarFuel family.");
+
+    // Show referral modal after a brief delay for better UX
+    setTimeout(() => {
+      setShowReferralModal(true);
+    }, 500);
+
     setEmail("");
   };
 
@@ -28,8 +53,16 @@ export default function Hero() {
 
       <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
         <div className="max-w-2xl">
-          <div className="inline-block bg-accent text-white px-4 py-2 rounded-full text-sm font-bold mb-6 animate-pulse-slow shadow-lg shadow-accent/20">
-            🚀 Now Accepting Early Access Signups
+          <div className="flex flex-wrap gap-3 mb-6">
+            <div className="inline-block bg-accent text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse-slow shadow-lg shadow-accent/20">
+              🚀 Now Accepting Early Access Signups
+            </div>
+            {referredBy && !submitted && (
+              <div className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold shadow-lg shadow-primary/20">
+                <Zap className="w-4 h-4" />
+                You were invited by a friend!
+              </div>
+            )}
           </div>
           
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] mb-6 text-foreground">
@@ -105,6 +138,12 @@ export default function Hero() {
           </div>
         </div>
       </div>
+
+      {/* Referral Success Modal - appears after signup */}
+      <ReferralSuccessModal
+        open={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+      />
     </section>
   );
 }

@@ -1,19 +1,40 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check } from "lucide-react";
-import { useState } from "react";
+import { Check, Gift } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useReferral } from "@/contexts/ReferralContext";
+import ReferralSuccessModal from "@/components/ReferralSuccessModal";
 
 export default function Pricing() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+
+  const { generateReferralCode, isSignedUp } = useReferral();
+
+  // Sync submitted state with isSignedUp from context
+  useEffect(() => {
+    if (isSignedUp) {
+      setSubmitted(true);
+    }
+  }, [isSignedUp]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
+
+    // Generate referral code for this user
+    generateReferralCode(email);
+
     setSubmitted(true);
     toast.success("Added to the waitlist! We'll be in touch.");
+
+    // Show referral modal after a brief delay
+    setTimeout(() => {
+      setShowReferralModal(true);
+    }, 500);
+
     setEmail("");
   };
 
@@ -60,21 +81,30 @@ export default function Pricing() {
                 <span className="text-foreground/80 font-medium">{feature}</span>
               </div>
             ))}
+            {/* Referral perk highlight */}
+            <div className="flex items-center gap-3 bg-accent/10 -mx-4 px-4 py-3 rounded-xl">
+              <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                <Gift className="w-4 h-4 text-accent" />
+              </div>
+              <span className="text-foreground font-semibold">
+                Refer friends → Get FREE weeks!
+              </span>
+            </div>
           </div>
           
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <Input 
-              type="email" 
-              placeholder="Your email" 
+            <Input
+              type="email"
+              placeholder="Your email"
               className="rounded-full px-6 py-6 text-center border-2"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={submitted}
             />
-            <Button 
-              type="submit" 
-              size="lg" 
+            <Button
+              type="submit"
+              size="lg"
               className="w-full rounded-full py-6 text-lg font-bold bg-accent hover:bg-accent/90 text-white shadow-lg shadow-accent/20"
               disabled={submitted}
             >
@@ -83,6 +113,12 @@ export default function Pricing() {
           </form>
         </div>
       </div>
+
+      {/* Referral Success Modal */}
+      <ReferralSuccessModal
+        open={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+      />
     </section>
   );
 }

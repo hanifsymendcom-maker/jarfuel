@@ -6,6 +6,8 @@ import Nutrition from "@/components/Nutrition";
 import Comparison from "@/components/Comparison";
 import HowItWorks from "@/components/HowItWorks";
 import Pricing from "@/components/Pricing";
+import ReferralSection from "@/components/ReferralSection";
+import ReferralBanner from "@/components/ReferralBanner";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 
@@ -21,9 +23,11 @@ export default function Home() {
         <Comparison />
         <HowItWorks />
         <Pricing />
+        <ReferralSection />
         <FinalCTA />
       </main>
       <Footer />
+      <ReferralBanner />
     </div>
   );
 }

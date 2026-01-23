@@ -2,15 +2,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useReferral } from "@/contexts/ReferralContext";
+import ReferralSuccessModal from "@/components/ReferralSuccessModal";
 
 export default function FinalCTA() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     days: 14,
     hours: 8,
     minutes: 42
   });
+
+  const { generateReferralCode, isSignedUp } = useReferral();
+
+  // Sync submitted state with isSignedUp from context
+  useEffect(() => {
+    if (isSignedUp) {
+      setSubmitted(true);
+    }
+  }, [isSignedUp]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,9 +39,18 @@ export default function FinalCTA() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
+
+    // Generate referral code for this user
+    generateReferralCode(email);
+
     setSubmitted(true);
     toast.success("Spot reserved! Welcome aboard.");
+
+    // Show referral modal after a brief delay
+    setTimeout(() => {
+      setShowReferralModal(true);
+    }, 500);
+
     setEmail("");
   };
 
@@ -84,7 +105,18 @@ export default function FinalCTA() {
             </div>
           </div>
         </div>
+
+        {/* Referral Teaser */}
+        <p className="mt-8 text-white/60 text-sm">
+          Plus: Refer friends after signing up and earn <span className="text-accent font-semibold">FREE weeks</span>!
+        </p>
       </div>
+
+      {/* Referral Success Modal */}
+      <ReferralSuccessModal
+        open={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+      />
     </section>
   );
 }
